@@ -10,7 +10,7 @@ namespace dotnet_rpg.Controllers
     {
         private  static List<Character> characters = new List<Character>{
             new Character(),
-            new Character{Name = "Duccio"}
+            new Character{Name = "Duccio", Id = 1}
         };
 
 
@@ -20,10 +20,19 @@ namespace dotnet_rpg.Controllers
         {
             return Ok(characters);
         }
-        [HttpGet]
+        [HttpGet("{get}")]
         public ActionResult<Character> GetSingle(int id)
         {
-            return Ok(characters[id]);
+            return Ok(characters.FirstOrDefault(c => c.Id == id));
         }
+
+        [HttpPost]
+        public ActionResult<List<Character>> AddCharacter(Character newCharacter)
+        {
+            characters.Add(newCharacter);
+            return Ok(characters);
+        }
+
+
     }
 }
