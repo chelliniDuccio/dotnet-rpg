@@ -19,7 +19,7 @@ namespace dotnet_rpg.Controllers
 
         [HttpGet]
         [Route("GetAll")]
-        public async Task<ActionResult<List<Character>>> Get()
+        public async Task<ActionResult<ServiceResponse<List<Character>>>>  Get()
         {
             return Ok(await _characterServices.GetAllCharacter());
         }
