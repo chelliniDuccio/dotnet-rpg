@@ -1,6 +1,6 @@
 ﻿using dotnet_rpg.Models;
 
-namespace dotnet_rpg.Models.Dtos.Character
+namespace dotnet_rpg.Dtos.Character
 {
     public class AddCharacterDto
     {
@@ -9,7 +9,7 @@ namespace dotnet_rpg.Models.Dtos.Character
         public int Streigth { get; set; } = 10;
         public int Defence { get; set; } = 10;
         public int Intelligence { get; set; } = 10;
-        public RpgClass MyProperty { get; set; } = RpgClass.Knight;
+        public RpgClass Class { get; set; } = RpgClass.Knight;
     }
 }
 

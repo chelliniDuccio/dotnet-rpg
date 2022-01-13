@@ -1,6 +1,6 @@
 ﻿using AutoMapper;
 using dotnet_rpg.Models;
-using dotnet_rpg.Models.Dtos.Character;
+using dotnet_rpg.Dtos.Character;
 
 namespace dotnet_rpg
 {
