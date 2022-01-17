@@ -55,17 +55,18 @@ namespace dotnet_rpg.Services.CharacterServices
             var serviceResponse = new ServiceResponse<GetCharacterDto>();
             try
             {
-                Character character = characters.FirstOrDefault(c => c.Id == updateCharacter.Id);
+                Character character = await _context.Characters.FirstOrDefaultAsync(c => c.Id == updateCharacter.Id);
 
                 character.Name = updateCharacter.Name;
                 character.HitPoint = updateCharacter.HitPoint;
                 character.Streigth = updateCharacter.Streigth;
                 character.Defence = updateCharacter.Defence;
-                character.Intelligence = character.Intelligence;
+                character.Intelligence = updateCharacter.Intelligence;
                 character.Class = updateCharacter.Class;
 
-                serviceResponse.Data = _mapper.Map<GetCharacterDto>(character);
+                await _context.SaveChangesAsync();
 
+                serviceResponse.Data = _mapper.Map<GetCharacterDto>(character);
             }
             catch (Exception ex)
             {
