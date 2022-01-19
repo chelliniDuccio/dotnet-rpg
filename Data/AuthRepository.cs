@@ -1,4 +1,5 @@
 ﻿using dotnet_rpg.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace dotnet_rpg.Data
 {
@@ -17,21 +18,25 @@ namespace dotnet_rpg.Data
 
         public async Task<ServiceResponse<int>> Register(User user, string password)
         {
+            ServiceResponse<int> response = new ServiceResponse<int>();
+            if(await UserExist(user.UserName))
+            {
+                response.Success = false;
+                response.Message = "Username already exist";
+                return response;
+                }
+
             CreatePasswordHash(password, out byte[] passwordHash, out byte[] passwordSalt);
             user.PasswordHash = passwordHash;
             user.PasswordSalt = passwordSalt;
 
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
-            ServiceResponse<int> response = new ServiceResponse<int>;
             response.Data = user.Id;
             return response;
         }
 
-        public Task<bool> UserExist(string username)
-        {
-            throw new NotImplementedException();
-        }
+        public async Task<bool> UserExist(string username) => await _context.Users.AnyAsync(x => x.UserName.ToLower().Equals(username.ToLower()));
 
         private void CreatePasswordHash(string password, out byte[] passwordHash, out byte[] passwordSalt)
         {
