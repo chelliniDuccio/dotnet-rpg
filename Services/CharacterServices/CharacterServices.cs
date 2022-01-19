@@ -12,10 +12,7 @@ namespace dotnet_rpg.Services.CharacterServices
 
     public class CharacterService : ICharacterServices
     {
-        private static List<Character> characters = new List<Character>{
-            new Character(),
-            new Character{Name = "Duccio", Id = 1}
-        };
+        private static List<Character> characters = new List<Character>{ };
 
         private readonly IMapper _mapper;
         private readonly DataContext _context;
@@ -63,6 +60,8 @@ namespace dotnet_rpg.Services.CharacterServices
                 character.Defence = updateCharacter.Defence;
                 character.Intelligence = updateCharacter.Intelligence;
                 character.Class = updateCharacter.Class;
+
+                //_mapper.Map(updateCharacter, character);
 
                 await _context.SaveChangesAsync();
 
