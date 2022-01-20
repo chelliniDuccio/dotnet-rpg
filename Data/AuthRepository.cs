@@ -1,20 +1,27 @@
 ﻿using dotnet_rpg.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
 
 namespace dotnet_rpg.Data
 {
     public class AuthRepository : IAuthRepository
     {
         private readonly DataContext _context;
-        public AuthRepository(DataContext context)
+        private readonly IConfiguration _configuration;
+
+        public AuthRepository(DataContext context, IConfiguration configuration)
         {
             _context = context;
+            _configuration = configuration;
         }
 
         public async Task<ServiceResponse<string>> Login(string username, string password)
         {
             var response = new ServiceResponse<string>();
-            var user = await _context.Users.FirstOrDefaultAsync(c => c.UserName.ToLower().Equals(username.ToLower()));
+            var user = await _context.Users.FirstOrDefaultAsync(c => c.Username.ToLower().Equals(username.ToLower()));
             if (user == null)
             {
                 response.Success = false;
@@ -27,7 +34,7 @@ namespace dotnet_rpg.Data
             }
             else
             {
-                response.Data = user.Id.ToString();
+                response.Data = CreateToken(user);
             }
             return response;
         }
@@ -36,7 +43,7 @@ namespace dotnet_rpg.Data
         public async Task<ServiceResponse<int>> Register(User user, string password)
         {
             ServiceResponse<int> response = new ServiceResponse<int>();
-            if (await UserExist(user.UserName))
+            if (await UserExist(user.Username))
             {
                 response.Success = false;
                 response.Message = "Username already exist";
@@ -53,7 +60,7 @@ namespace dotnet_rpg.Data
             return response;
         }
 
-        public async Task<bool> UserExist(string username) => await _context.Users.AnyAsync(x => x.UserName.ToLower().Equals(username.ToLower()));
+        public async Task<bool> UserExist(string username) => await _context.Users.AnyAsync(x => x.Username.ToLower().Equals(username.ToLower()));
 
         private void CreatePasswordHash(string password, out byte[] passwordHash, out byte[] passwordSalt)
         {
@@ -75,6 +82,29 @@ namespace dotnet_rpg.Data
                 }
                 return true;
             }
+        }
+
+        private string CreateToken(User user)
+        {
+            var claims = new List<Claim>
+            {
+                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+                new Claim(ClaimTypes.Name, user.Username)
+            };
+            
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration.GetSection("AppSettings:Token").Value));
+            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha512Signature);
+            var tokenDescriptor = new SecurityTokenDescriptor
+            {
+                Subject = new ClaimsIdentity(claims),
+                Expires = System.DateTime.Now.AddDays(1),
+                SigningCredentials = creds
+            };
+            
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var token =  tokenHandler.CreateToken(tokenDescriptor);
+
+            return tokenHandler.WriteToken(token);
         }
     }
 }
