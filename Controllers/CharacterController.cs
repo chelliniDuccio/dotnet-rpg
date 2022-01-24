@@ -4,12 +4,15 @@ using dotnet_rpg.Services.CharacterServices;
 using Microsoft.AspNetCore.Mvc;
 using dotnet_rpg.Dtos;
 using Microsoft.AspNetCore.Authorization;
+using dotnet_rpg.Data;
+using System.Security.Claims;
 
 namespace dotnet_rpg.Controllers
 {
-    [Authorize]
     [ApiController]
     [Route("[controller]")]
+    [Authorize]
+
     public class CharacterController : ControllerBase
     {
         private readonly ICharacterServices _characterServices;
