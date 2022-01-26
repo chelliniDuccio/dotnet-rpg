@@ -1,5 +1,6 @@
 using dotnet_rpg.Data;
 using dotnet_rpg.Services.CharacterServices;
+using dotnet_rpg.Services.FigthService;
 using dotnet_rpg.Services.WeaponService;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
@@ -8,6 +9,7 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.Filters;
 using System.Configuration;
+using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,7 +17,10 @@ var configuration = builder.Configuration;
 
 // Add services to the container.
 
-builder.Services.AddControllers();
+builder.Services.AddControllers().AddJsonOptions(option =>
+{
+    option.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+});
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
@@ -34,6 +39,7 @@ builder.Services.AddSwaggerGen(c =>
 builder.Services.AddScoped<ICharacterServices, CharacterService>();
 builder.Services.AddScoped<IAuthRepository, AuthRepository>();
 builder.Services.AddScoped<IWeaponService, WeaponService>();
+builder.Services.AddScoped<IFightService, FightService>();
 
 builder.Services.AddAutoMapper(typeof(Program));
 builder.Services.AddDbContext<DataContext>(options => options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
