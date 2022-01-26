@@ -140,7 +140,7 @@ namespace dotnet_rpg.Services.CharacterServices
                 var character = await _context.Characters
                     .Include(c => c.Weapon)
                     .Include(c => c.Skills)
-                    .FirstOrDefaultAsync(c => c.Id == newCharacterSkill.CharacterId && c.Id == getUserID());
+                    .FirstOrDefaultAsync(c => c.Id == newCharacterSkill.CharacterId && c.User.Id == getUserID());
 
                 if (character == null)
                 {
@@ -149,7 +149,7 @@ namespace dotnet_rpg.Services.CharacterServices
                     return response;
                 }
 
-                var skill = await _context.Skills.FirstOrDefaultAsync(S => S.Id == newCharacterSkill.SkillId);
+                var skill = await _context.Skills.FirstOrDefaultAsync(s => s.Id == newCharacterSkill.SkillId);
 
                 if (skill == null)
                 {
