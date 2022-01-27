@@ -137,6 +137,19 @@ namespace dotnet_rpg.Services.FigthService
                     .Include(c => c.Skills)
                     .Where(c => request.CharatctersIds.Contains(c.Id)).ToListAsync();
 
+                if(characters.Count == 0)
+                {
+                    response.Success=false;
+                    response.Message = "You need at least 2 characetrs to start a fight";
+                    return response;
+                }
+                if (characters.Count == 1)
+                {
+                    response.Success = false;
+                    response.Message = $"{characters[0].Name} has no apponent to fight";
+                    return response;
+                }
+
                 var defeat = false;
 
                 while (!defeat)
@@ -157,7 +170,12 @@ namespace dotnet_rpg.Services.FigthService
                         }
                         else
                         {
-                            var skill = attacker.Skills[new Random().Next(attacker.Skills.Count())];
+                            if(attacker.Skills.Count == 0)
+                            {
+                                response.Data.Log.Add($"{attacker.Name} isn't prepared to fight");
+                                continue;
+                            }
+                            var skill = attacker.Skills[new Random().Next(attacker.Skills.Count() - 1)];
                             attackUsed = skill.Name;
                             damage = SkillAttack(attacker, opponent, skill);
                         }
@@ -169,14 +187,13 @@ namespace dotnet_rpg.Services.FigthService
                             defeat = true;
                             opponent.Defeats++;
                             attacker.Victory++;
-
-                            response.Data.Log.Add($"⚔️{attacker.Name} ({attacker.HitPoint}❤️) has defeated {opponent.Name}⚔️");
+                            response.Data.Log.Add($"⚔️⚔️ {attacker.Name} ({attacker.HitPoint}❤️) has defeated {opponent.Name}⚔️⚔️");
                             break;
                         }
                     }
-                    
                 }
                 characters.ForEach(c => { c.Fights++; c.HitPoint = 100; });
+                _context.SaveChangesAsync();
             }
             catch (Exception ex)
             {
