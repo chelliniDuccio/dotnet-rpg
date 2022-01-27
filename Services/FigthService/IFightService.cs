@@ -10,6 +10,9 @@ namespace dotnet_rpg.Services.FigthService
         Task<ServiceResponse<AttackResultDto>> WeaponAttack(WeaponAttackDto request);
         Task<ServiceResponse<AttackResultDto>> SkillAttack(SkillAttackDto request);
         Task<ServiceResponse<FightResultDto>> Fight(FightRequestDto request);
+        Task<ServiceResponse<FightResultDto>> BattleRoyal(FightRequestDto request);
+        Task<ServiceResponse<FightResultDto>> TeamBatle(List<List<int>> request);
+
         Task<ServiceResponse<List<HightscoreDto>>> HightScore();
     }
 }

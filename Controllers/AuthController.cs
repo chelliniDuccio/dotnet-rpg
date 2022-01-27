@@ -25,6 +25,7 @@ namespace dotnet_rpg.Controllers
             {
                 return BadRequest(response);
             }
+            response.Message = $"Welcome {request.Username}";
             return Ok(response);
         }
 
@@ -36,6 +37,7 @@ namespace dotnet_rpg.Controllers
             {
                 return BadRequest(response);
             }
+            response.Message = $"Welcome back {request.Username}";
             return Ok(response);
         }
     }

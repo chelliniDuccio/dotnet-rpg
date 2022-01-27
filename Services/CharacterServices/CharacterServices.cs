@@ -36,6 +36,7 @@ namespace dotnet_rpg.Services.CharacterServices
                 .Include(c => c.Skills)
                 .Where(c => c.User.Id == getUserID()).ToListAsync();
             serviceResponse.Data = dbCharacters.Select(c => _mapper.Map<GetCharacterDto>(c)).ToList();
+            if (dbCharacters.Count == 0) serviceResponse.Message = $"No character found";
             return serviceResponse;
         }
 
@@ -58,7 +59,7 @@ namespace dotnet_rpg.Services.CharacterServices
             _context.Characters.Add(character);
             await _context.SaveChangesAsync();
             serviceResponse.Data = await _context.Characters
-                .Where(c => c.Id == getUserID())
+                .Where(c => c.User.Id == getUserID())
                 .Select(c => _mapper.Map<GetCharacterDto>(c)).ToListAsync();
             return serviceResponse;
         }
@@ -81,8 +82,6 @@ namespace dotnet_rpg.Services.CharacterServices
                     character.Intelligence = updateCharacter.Intelligence;
                     character.Class = updateCharacter.Class;
 
-                    //_mapper.Map(updateCharacter, character);
-
                     await _context.SaveChangesAsync();
 
                     serviceResponse.Data = _mapper.Map<GetCharacterDto>(character);
@@ -92,7 +91,6 @@ namespace dotnet_rpg.Services.CharacterServices
                     serviceResponse.Success = false;
                     serviceResponse.Message = "Character not found";
                 }
-
             }
             catch (Exception ex)
             {
