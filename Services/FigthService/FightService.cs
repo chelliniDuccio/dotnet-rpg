@@ -1,20 +1,21 @@
-﻿using dotnet_rpg.Data;
+﻿using AutoMapper;
+using dotnet_rpg.Data;
 using dotnet_rpg.Dtos.Fight;
 using dotnet_rpg.Dtos.Skill;
 using dotnet_rpg.Models;
 using Microsoft.EntityFrameworkCore;
-
-
 
 namespace dotnet_rpg.Services.FigthService
 {
     public class FightService : IFightService
     {
         private readonly DataContext _context;
+        private readonly IMapper _mapper;
 
-        public FightService(DataContext context)
+        public FightService(DataContext context, IMapper mapper)
         {
             _context = context;
+            _mapper = mapper;
         }
 
         public async Task<ServiceResponse<AttackResultDto>> WeaponAttack(WeaponAttackDto request)
@@ -137,9 +138,9 @@ namespace dotnet_rpg.Services.FigthService
                     .Include(c => c.Skills)
                     .Where(c => request.CharatctersIds.Contains(c.Id)).ToListAsync();
 
-                if(characters.Count == 0)
+                if (characters.Count == 0)
                 {
-                    response.Success=false;
+                    response.Success = false;
                     response.Message = "You need at least 2 characetrs to start a fight";
                     return response;
                 }
@@ -170,7 +171,7 @@ namespace dotnet_rpg.Services.FigthService
                         }
                         else
                         {
-                            if(attacker.Skills.Count == 0)
+                            if (attacker.Skills.Count == 0)
                             {
                                 response.Data.Log.Add($"{attacker.Name} isn't prepared to fight");
                                 continue;
@@ -201,6 +202,22 @@ namespace dotnet_rpg.Services.FigthService
                 response.Message = ex.Message;
             }
             return response;
+        }
+
+        public async Task<ServiceResponse<List<HightscoreDto>>> HightScore()
+        {
+            var charcaracter = await _context.Characters
+                .Where(c => c.Fights > 0)
+                //.OrderByDescending(c => c.Victory)
+                //.ThenBy(c => c.Defeats)
+                .ToListAsync();
+
+            var result = new ServiceResponse<List<HightscoreDto>>
+            {
+                Data = charcaracter.Select(c => _mapper.Map<HightscoreDto>(c)).ToList()
+            };
+
+            return result;
         }
     }
 }
