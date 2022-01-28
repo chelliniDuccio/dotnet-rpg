@@ -326,7 +326,7 @@ namespace dotnet_rpg.Services.FigthService
                         var attacker = attackerTeam[new Random().Next(attackerTeam.Count)];
                         var opponents = fightigTeams.Where(t => t != attackerTeam).ToList();
                         var opponentTeam = opponents[new Random().Next(fightigTeams.Count() - 1)];
-                        var opponent = opponentTeam[new Random().Next(opponents.Count() - 1)];
+                        var opponent = opponentTeam[new Random().Next(opponentTeam.Count() - 1)];
 
                         int damage = 0;
                         string attackUsed = string.Empty;
@@ -362,7 +362,7 @@ namespace dotnet_rpg.Services.FigthService
                             }
                             if (fightigTeams.Count == 1)
                             {
-                                attacker.Victories++;
+                                attackerTeam.ForEach(c => c.Victories++);
                                 response.Data.Log.Add($"🏆⚔️ {attacker.Name}'s team has won ⚔️🏆");
                                 break;
                             }
@@ -377,9 +377,92 @@ namespace dotnet_rpg.Services.FigthService
                         var character = await _context.Characters
                             .FirstOrDefaultAsync(c => c.Id == characterId);
                         character.HitPoint = 100;
+                        character.Fights++;
                     }
                 }
                 _context.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                response.Success = false;
+                response.Message = ex.Message;
+            }
+            return response;
+        }
+
+        public async Task<ServiceResponse<FightResultDto>> BossFight(FightRequestDto request)
+        {
+            var response = new ServiceResponse<FightResultDto> { Data = new FightResultDto() };
+
+            try
+            {
+                var characters = await _context.Characters
+                    .Include(c => c.Weapon)
+                    .Where(c => request.CharatctersIds.Contains(c.Id)).ToListAsync();
+
+                var bossId = new Random().Next(0, characters.Count);
+
+                var boss = new Character()
+                {
+                    Name = characters[bossId].Name,
+                    HitPoint = characters[bossId].HitPoint * 2,
+                    Streigth = characters[bossId].Streigth * 2,
+                    Defence = characters[bossId].Defence,
+                    Intelligence = characters[bossId].Intelligence,
+                    Weapon = characters[bossId].Weapon,
+                };
+                boss.Weapon.Damage *= 2;
+
+                var bossDefeated = false;
+                var bossTurn = false;
+
+                if (characters.Count < 3)
+                {
+                    response.Success = false;
+                    response.Message = "You need at least 3 characetrs to start a boss fight";
+                    return response;
+                }
+
+                characters.Remove(characters[bossId]);
+
+                while (characters.ToList().Count != 0 || bossDefeated)
+                {
+                    var attacker = bossTurn ? boss : characters[new Random().Next(characters.Count())];
+                    var opponent = bossTurn ? characters[new Random().Next(characters.Count())] : boss;
+
+                    int damage = 0;
+                    string attackUsed = string.Empty;
+
+                    attackUsed = attacker.Weapon.Name;
+                    damage = WeaponAttack(attacker, opponent);
+
+                    response.Data.Log.Add($"{attacker.Name} attack {opponent.Name} using {attackUsed} with {damage}");
+
+                    if (opponent.HitPoint <= 0)
+                    {
+                        if (bossTurn)
+                        {
+                            characters.Remove(opponent);
+                            response.Data.Log.Add($"☠️ {attacker.Name} has defeated {opponent.Name} ☠️");
+                        }
+                        else
+                        {
+                            response.Data.Log.Add($"☠️ {attacker.Name} has defeated {opponent.Name} ☠️");
+                            response.Data.Log.Add($"🏆⚔️ {attacker.Name}'s team has defeated the boss ⚔️🏆");
+                            bossDefeated = true;
+                            break;
+                        }
+                    }
+                    if (characters.Count == 0)
+                    {
+                        response.Data.Log.Add($"🏆⚔️ {attacker.Name} has defeated all the team ⚔️🏆");
+                        break;
+                    }
+                    bossTurn = bossTurn ? false : true;
+                }
+                characters.ForEach(c => { c.HitPoint = 100; c.Fights++; });
+
+                //_context.SaveChangesAsync();
             }
             catch (Exception ex)
             {

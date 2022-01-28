@@ -48,6 +48,12 @@ namespace dotnet_rpg.Controllers
             return Ok(await _fightService.TeamBatle(request));
         }
 
+        [HttpPost("BossFight")]
+        public async Task<ActionResult<ServiceResponse<AttackResultDto>>> BossFight(FightRequestDto request)
+        {
+            return Ok(await _fightService.BossFight(request));
+        }
+
         [HttpGet]
         public async Task<ActionResult<ServiceResponse<HightscoreDto>>> GetHighscore()
         {
