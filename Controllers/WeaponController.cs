@@ -21,9 +21,15 @@ namespace dotnet_rpg.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<ServiceResponse<GetCharacterDto>>> AddWeapon(AddWeaponDto newWeapon)
+        public async Task<ActionResult<ServiceResponse<GetCharacterDto>>> AddWeapon(NewWeaponDto newWeapon)
         {
             return Ok(await _weaponService.AddWeapon(newWeapon));
+        }
+
+        [HttpPost("Change")]
+        public async Task<ActionResult<ServiceResponse<GetCharacterDto>>> ChangeWeapon(NewWeaponDto newWeapon)
+        {
+            return Ok(await _weaponService.ChangeWeapon(newWeapon));
         }
     }
 }

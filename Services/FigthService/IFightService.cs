@@ -12,7 +12,6 @@ namespace dotnet_rpg.Services.FigthService
         Task<ServiceResponse<FightResultDto>> Fight(FightRequestDto request);
         Task<ServiceResponse<FightResultDto>> BattleRoyale(FightRequestDto request);
         Task<ServiceResponse<FightResultDto>> TeamBatle(List<List<int>> request);
-
         Task<ServiceResponse<List<HightscoreDto>>> HightScore();
     }
 }

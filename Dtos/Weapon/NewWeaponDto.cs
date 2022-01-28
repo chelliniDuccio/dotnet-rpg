@@ -1,6 +1,6 @@
 ﻿namespace dotnet_rpg.Dtos.Weapon
 {
-    public class AddWeaponDto
+    public class NewWeaponDto
     {
         public string Name { get; set; }
         public int Damage { get; set; }
