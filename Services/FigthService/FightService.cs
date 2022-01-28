@@ -206,7 +206,7 @@ namespace dotnet_rpg.Services.FigthService
             return response;
         }
 
-        public async Task<ServiceResponse<FightResultDto>> BattleRoyal(FightRequestDto request)
+        public async Task<ServiceResponse<FightResultDto>> BattleRoyale(FightRequestDto request)
         {
             var response = new ServiceResponse<FightResultDto> { Data = new FightResultDto() };
 
@@ -304,7 +304,7 @@ namespace dotnet_rpg.Services.FigthService
                         team.Add(await _context.Characters
                             .Include(c => c.Weapon)
                             .Include(c => c.Skills)
-                            .FirstOrDefaultAsync(c => c.Id == characterId)); 
+                            .FirstOrDefaultAsync(c => c.Id == characterId));
                     }
                     teams.Add(team);
                 }
@@ -319,14 +319,14 @@ namespace dotnet_rpg.Services.FigthService
                 var fightigTeams = new List<List<Character>>();
                 teams.ForEach(t => fightigTeams.Add(t));
 
-                while(fightigTeams.Count != 1)
+                while (fightigTeams.ToList().Count != 1)
                 {
-                    foreach (var attackerTeam in fightigTeams.ToList())
+                    foreach (var attackerTeam in fightigTeams.ToList().Where(t => t.Count > 0))
                     {
                         var attacker = attackerTeam[new Random().Next(attackerTeam.Count)];
                         var opponents = fightigTeams.Where(t => t != attackerTeam).ToList();
                         var opponentTeam = opponents[new Random().Next(fightigTeams.Count() - 1)];
-                        var opponent = opponentTeam[new Random().Next(opponents.Count() -1)];
+                        var opponent = opponentTeam[new Random().Next(opponents.Count() - 1)];
 
                         int damage = 0;
                         string attackUsed = string.Empty;
@@ -357,7 +357,7 @@ namespace dotnet_rpg.Services.FigthService
                             opponentTeam.Remove(opponent);
                             if (opponentTeam.Count == 0)
                             {
-                                response.Data.Log.Add($"🚩 {opponent.Name}'s team has lose ");
+                                response.Data.Log.Add($"🚩 {opponent.Name}'s team has lose");
                                 fightigTeams.Remove(opponentTeam);
                             }
                             if (fightigTeams.Count == 1)
@@ -369,7 +369,16 @@ namespace dotnet_rpg.Services.FigthService
                         }
                     }
                 }
-                teams.ForEach(t => t.ForEach(c => { c.Fights++; c.HitPoint = 100; }));
+
+                foreach (var team in request)
+                {
+                    foreach (var characterId in team)
+                    {
+                        var character = await _context.Characters
+                            .FirstOrDefaultAsync(c => c.Id == characterId);
+                        character.HitPoint = 100;
+                    }
+                }
                 _context.SaveChangesAsync();
             }
             catch (Exception ex)
@@ -395,6 +404,5 @@ namespace dotnet_rpg.Services.FigthService
 
             return result;
         }
-
     }
 }

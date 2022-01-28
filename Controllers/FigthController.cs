@@ -36,10 +36,10 @@ namespace dotnet_rpg.Controllers
             return Ok(await _fightService.Fight(request));
         }
 
-        [HttpPost("BattleRoyal")]
-        public async Task<ActionResult<ServiceResponse<AttackResultDto>>> BattleRoyal(FightRequestDto request)
+        [HttpPost("BattleRoyale")]
+        public async Task<ActionResult<ServiceResponse<AttackResultDto>>> BattleRoyale(FightRequestDto request)
         {
-            return Ok(await _fightService.BattleRoyal(request));
+            return Ok(await _fightService.BattleRoyale(request));
         }
 
         [HttpPost("TeamBattle")]
