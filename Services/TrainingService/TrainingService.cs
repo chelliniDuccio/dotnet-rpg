@@ -37,7 +37,7 @@ namespace dotnet_rpg.Services.TrainingService
             try
             {
                 var character = await GetCharacterAsync(characterId);
-
+                 
                 if(character == null)
                 {
                     response.Success = false;
