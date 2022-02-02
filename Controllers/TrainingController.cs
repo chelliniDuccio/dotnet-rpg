@@ -18,28 +18,10 @@ namespace dotnet_rpg.Controllers
             _trainingService = trainingService;
         }
 
-        [HttpPost("Strength")]
-        public async Task<ActionResult<ServiceResponse<TrainingService>>> StrenghtTraining(int characterId)
+        [HttpPost]
+        public async Task<ActionResult<ServiceResponse<TrainingService>>> Training(int characterId, TrainingType trainingType)
         {
-            return Ok(await _trainingService.StrengthTraining(characterId));
-        }
-
-        [HttpPost("Defence")]
-        public async Task<ActionResult<ServiceResponse<TrainingService>>> DefenceTraining(int characterId)
-        {
-            return Ok(await _trainingService.DefenceTraining(characterId));
-        }
-
-        [HttpPost("Intelligence")]
-        public async Task<ActionResult<ServiceResponse<TrainingService>>> IntelligenceTraining(int characterId)
-        {
-            return Ok(await _trainingService.IntelligenceTraining(characterId));
-        }
-
-        [HttpPost("Weapon")]
-        public async Task<ActionResult<ServiceResponse<TrainingService>>> WeaponTraining(int characterId)
-        {
-            return Ok(await _trainingService.WeaponTraining(characterId));
+            return Ok(await _trainingService.Training(characterId, trainingType));
         }
     }
 }
