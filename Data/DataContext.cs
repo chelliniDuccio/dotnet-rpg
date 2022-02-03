@@ -13,6 +13,7 @@ namespace dotnet_rpg.Data
         public DbSet<User> Users { get; set; }
         public DbSet<Weapon> Weapons { get; set; }
         public DbSet<Skill> Skills { get; set; }
+        public DbSet<CharacterClassConfiguration> ClassConfigurations { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -21,6 +22,8 @@ namespace dotnet_rpg.Data
                 new Skill { Id = 2, Name = "arrows", Damage = 35 },
                 new Skill { Id = 3, Name = "fireball", Damage = 50 }
                 );
+
+            modelBuilder.Entity<CharacterClassConfiguration>().HasIndex(c => c.Class).IsUnique();
         }
     }
 }

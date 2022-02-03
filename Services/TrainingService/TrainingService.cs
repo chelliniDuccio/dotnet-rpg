@@ -12,10 +12,10 @@ namespace dotnet_rpg.Services.TrainingService
     [JsonConverter(typeof(JsonStringEnumConverter))]
     public enum TrainingType
     {
-        strength,
-        defence,
-        intelligence,
-        weaponDamage
+        Strength,
+        Defence,
+        Intelligence,
+        WeaponDamage
     }
 
     public class TrainingService : ITrainingService
@@ -31,14 +31,6 @@ namespace dotnet_rpg.Services.TrainingService
 
         private int getUserID() => int.Parse(_httpContextAccessor.HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier));
 
-        private async Task<Character> GetCharacterAsync(int id)
-        {
-            var character = await _context.Characters
-                    .Include(c => c.Weapon)
-                    .FirstOrDefaultAsync(c => c.Id == id && c.User.Id == getUserID());
-            return character;
-        }
-
         private int characterStats(Character character) => character.Streigth + character.Defence + character.Intelligence + character.Weapon.Damage;
 
         public async Task<ServiceResponse<TrainingDto>> Training(int characterId, TrainingType trainingType)
@@ -47,48 +39,53 @@ namespace dotnet_rpg.Services.TrainingService
 
             try
             {
-                var character = await GetCharacterAsync(characterId);
+                int maxTotal = 230;
 
-                if (character == null)
+                var character = await _context.Characters
+                    .Include(c => c.Weapon)
+                    .FirstOrDefaultAsync(c => c.Id == characterId && c.User.Id == getUserID());
+
+                CharacterClassConfiguration configuration = await _context.ClassConfigurations
+                    .FirstOrDefaultAsync(c => c.Class == character.Class);
+
+                if (character == null || configuration == null)
                 {
                     response.Success = false;
-                    response.Message = "Character not found";
+                    response.Message = $"Character or configuration not found";
                     return response;
                 }
 
                 var characterValues = characterStats(character);
-                if(characterValues >= 320)
+                if (characterValues >= maxTotal)
                 {
                     response.Success = false;
                     response.Message = "Character is yet enough strong";
                     return response;
                 }
 
-                var training = new Random().Next(1, characterValues < 225 ? 5 : 230 - characterValues);
-
-                if (training <= 0)
-                {
-                    response.Success = false;
-                    response.Message = "Character is yet enough strong";
-                    return response;
-                }
+                var maxTraining = characterStats(character) <= 225 ? 5 : 230 - characterStats(character);
+                var training = new Random().Next(1, maxTraining);
 
                 switch (trainingType)
                 {
-                    case TrainingType.strength:
+                    case TrainingType.Strength:
                         character.Streigth += training;
+                        if (character.Streigth > configuration.MaxStrength) character.Streigth = configuration.MaxStrength;
                         response.Message = new string($"{character.Name}'s strngth has been incremented by {training} ({character.Streigth}⚔)");
                         break;
-                    case TrainingType.defence:
+                    case TrainingType.Defence:
                         character.Defence += training;
+                        if (character.Defence > configuration.MaxDefence) character.Defence = configuration.MaxDefence;
                         response.Message = new string($"{character.Name}'s defence has been incremented by {training} ({character.Defence}🛡)");
                         break;
-                    case TrainingType.intelligence:
+                    case TrainingType.Intelligence:
                         character.Intelligence += training;
+                        if (character.Intelligence > configuration.MaxIntelligence) character.Intelligence = configuration.MaxIntelligence;
                         response.Message = new string($"{character.Name}'s intelligence has been incremented by {training} ({character.Intelligence}📜)");
                         break;
-                    case TrainingType.weaponDamage:
+                    case TrainingType.WeaponDamage:
                         character.Weapon.Damage += training;
+                        if (character.Weapon.Damage > configuration.MaxWeaponDamage) character.Weapon.Damage = configuration.MaxWeaponDamage;
                         response.Message = new string($"{character.Name}'s weapon ({character.Weapon.Name}) damage has been incremented by {training} ({character.Weapon.Damage}🏹)");
                         break;
                     default:
